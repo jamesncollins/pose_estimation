@@ -44,7 +44,7 @@ Make sure to include the full image file name including extension.
 
 The tool works best when: 
 - the picture only has one person
-- the picture is not grainy
+- the picture is not grainy/dimly lit
 - the person is shown from at least waist up
 - the person is not obscuring their body e.g., crouching, squatting, wearing baggy clothes. 
 

@@ -1,14 +1,16 @@
 from cv2 import cv2
 import sys, os, requests 
 
-#PART_DICT = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4, "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9, "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14, "Background": 15}
-PART_DICT = ['Head', 'Neck', 'RShoulder', 'RElbow', 'RWrist', 'LShoulder', 'LElbow', 'LWrist', 'RHip', 'RKnee', 'RAnkle', 'LHip', 'LKnee', 'LAnkle', 'Chest', 'Background']
-NPOINTS = len(PART_DICT)
+ALL_JOINTS = ['Head', 'Neck', 'RShoulder', 'RElbow', 'RWrist',
+              'LShoulder', 'LElbow', 'LWrist', 'RHip', 'RKnee', 'RAnkle',
+              'LHip', 'LKnee', 'LAnkle', 'Chest', 'Background']
+EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [5, 6], [6, 7], [1, 14],
+         [14, 8], [8, 9], [9, 10], [14, 11], [11, 12], [12, 13]]
 
-POSE_PAIRS = [ ["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
+POSE_PAIRS = [["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
              ["RElbow", "RWrist"], ["Neck", "LShoulder"], ["LShoulder", "LElbow"],
              ["LElbow", "LWrist"], ["Neck", "Chest"], ["Chest", "RHip"], ["RHip", "RKnee"],
-             ["RKnee", "RAnkle"], ["Chest", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"] ]
+             ["RKnee", "RAnkle"], ["Chest", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"]]
 
 PROTO_FILE = "content/pose_deploy_linevec_faster_4_stages.prototxt.txt"
 WEIGHTS_FILE = "content/pose_iter_160000.caffemodel"
@@ -25,7 +27,7 @@ JOINT_DOT_COLOR = (0, 0, 255)
 JOINT_TEXT_COLOR = (0, 255, 0)
 JOINT_LINE_COLOR = (0, 255, 255)
 JOINT_LINE_THICKNESS = 3
-JOINT_FONT_SCALE = 1.5
+JOINT_FONT_SCALE = 0.75
 JOINT_FONT_THICKNESS = 2
 
 class Estimator():
@@ -51,7 +53,8 @@ class Estimator():
             points = self.get_image_points(output, img)
 
             #draw points and display eimage
-            self.draw_image(points, img)
+            self.draw_skeleton(points, img)
+            self.display_image(img)
 
         else:
             print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
@@ -76,7 +79,7 @@ class Estimator():
         H = output.shape[3]
 
         points = []
-        for i in range(NPOINTS):
+        for i in range(len(ALL_JOINTS)):
             #get heat map for each joint 
             prob_map = output[0, i, :, :]
 
@@ -94,30 +97,31 @@ class Estimator():
                 points.append(None)
         return points 
 
-    def draw_image(self, points, img):
+    def draw_skeleton(self, points, img):
         """
-        Draw points and display the image. 
+        Draw points and connect with lines. 
         """
 
         #draw points and labels.
-        for i in range(NPOINTS): 
+        for i in range(len(ALL_JOINTS)): 
             if points[i] != None:
                 x = points[i][0]
                 y = points[i][1]
                 cv2.circle(img, (x,y), JOINT_DOT_WIDTH, JOINT_DOT_COLOR, thickness=-1, lineType=cv2.FILLED)
-                cv2.putText(img, "{}".format(PART_DICT[i]), (x,y), cv2.FONT_HERSHEY_PLAIN, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
+                cv2.putText(img, "{}".format(ALL_JOINTS[i]), (x,y), cv2.FONT_HERSHEY_COMPLEX, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
 
         #draw lines between points. 
-        for pair in POSE_PAIRS:
-            part_ix_1 = PART_DICT.index(pair[0])
-            part_ix_2 = PART_DICT.index(pair[1])
+        for pair in EDGES:
+            point_a = points[pair[0]]
+            point_b = points[pair[1]]
 
-            pointA = points[part_ix_1]
-            pointB = points[part_ix_2]
-
-            if not pointA is None and not pointB is None:
-                cv2.line(img, pointA, pointB, JOINT_LINE_COLOR, JOINT_LINE_THICKNESS)
-        
+            if not point_a is None and not point_b is None:
+                cv2.line(img, point_a, point_b, JOINT_LINE_COLOR, JOINT_LINE_THICKNESS)
+ 
+    def display_image(self, img):
+        """
+        Display image. 
+        """       
         #display the image with the OpenCV image display. 
         cv2.imshow('image', img)
 
