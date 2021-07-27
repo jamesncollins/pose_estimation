@@ -34,8 +34,11 @@ class Estimator():
     def __init__(self, file_name):
         self.check_weights()
         file_path = 'content/' + file_name
-        output, img = self.learn_image(file_path)
-        self.print_pose(output, img)
+        if os.path.isfile(file_path):
+            output, img = self.learn_image(file_path)
+            self.print_pose(output, img)
+        else:
+            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'Content'")
 
     def check_weights(self):
         if os.path.isfile(WEIGHTS_FILE):
