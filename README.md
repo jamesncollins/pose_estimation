@@ -19,8 +19,21 @@ git clone https://github.com/jamesncollins/pose_estimation.git
 python sketch_pose.py <IMAGE-FILE-NAME>
 ```
 
+4. Press ESC to exit image.
+
+## Example
+
+```
+katharine.png
+```
+
 ![Katharine](https://github.com/jamesncollins/pose_estimation/blob/main/content/katharine.png?raw=true)
 
+```
+python sketch_pose.py katharine.png
+```
+
+ ![Pose](https://github.com/jamesncollins/pose_estimation/blob/main/content/katharine2.png?raw=true)
 
 
 ## Notes

@@ -31,6 +31,9 @@ JOINT_FONT_SCALE = 1.4
 JOINT_FONT_THICKNESS = 3
 
 class Estimator():
+    """
+    high level support for doing this and that.
+    """
     def __init__(self, file_name):
         self.check_weights()
         file_path = 'content/' + file_name
@@ -38,7 +41,7 @@ class Estimator():
             output, img = self.learn_image(file_path)
             self.print_pose(output, img)
         else:
-            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'Content'")
+            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
 
     def check_weights(self):
         if os.path.isfile(WEIGHTS_FILE):
