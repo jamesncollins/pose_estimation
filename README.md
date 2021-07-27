@@ -19,7 +19,7 @@ git clone https://github.com/jamesncollins/pose_estimation.git
 python sketch_pose.py <IMAGE-FILE-NAME>
 ```
 
-![Katharine](https://github.com/jamesncollins/pose_estimation/content/katharine.png?raw=true)
+![Katharine](https://github.com/jamesncollins/pose_estimation/blob/main/content/katharine.png?raw=true)
 
 
 
