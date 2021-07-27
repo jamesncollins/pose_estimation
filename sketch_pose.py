@@ -1,10 +1,8 @@
 from cv2 import cv2
 import sys, os, requests 
 
-PART_DICT = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-"LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-"RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14,
-"Background": 15}
+#PART_DICT = {"Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4, "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9, "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14, "Background": 15}
+PART_DICT = ['Head', 'Neck', 'RShoulder', 'RElbow', 'RWrist', 'LShoulder', 'LElbow', 'LWrist', 'RHip', 'RKnee', 'RAnkle', 'LHip', 'LKnee', 'LAnkle', 'Chest', 'Background']
 NPOINTS = len(PART_DICT)
 
 POSE_PAIRS = [ ["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
@@ -23,12 +21,12 @@ IN_WIDTH = 368
 RGB_MEAN = (0, 0, 0)
 
 JOINT_DOT_WIDTH = 15
-JOINT_DOT_COLOR = (0, 255, 255)
-JOINT_TEXT_COLOR = (0, 0, 255)
-JOINT_LINE_COLOR = (0, 255, 0)
+JOINT_DOT_COLOR = (0, 0, 255)
+JOINT_TEXT_COLOR = (0, 255, 0)
+JOINT_LINE_COLOR = (0, 255, 255)
 JOINT_LINE_THICKNESS = 3
-JOINT_FONT_SCALE = 1.4
-JOINT_FONT_THICKNESS = 3
+JOINT_FONT_SCALE = 1.5
+JOINT_FONT_THICKNESS = 2
 
 class Estimator():
     """
@@ -107,12 +105,12 @@ class Estimator():
                 x = points[i][0]
                 y = points[i][1]
                 cv2.circle(img, (x,y), JOINT_DOT_WIDTH, JOINT_DOT_COLOR, thickness=-1, lineType=cv2.FILLED)
-                cv2.putText(img, "{}".format(i), (x,y), cv2.FONT_HERSHEY_SIMPLEX, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
+                cv2.putText(img, "{}".format(PART_DICT[i]), (x,y), cv2.FONT_HERSHEY_PLAIN, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
 
         #draw lines between points. 
         for pair in POSE_PAIRS:
-            part_ix_1 = PART_DICT[pair[0]]
-            part_ix_2 = PART_DICT[pair[1]]
+            part_ix_1 = PART_DICT.index(pair[0])
+            part_ix_2 = PART_DICT.index(pair[1])
 
             pointA = points[part_ix_1]
             pointB = points[part_ix_2]
