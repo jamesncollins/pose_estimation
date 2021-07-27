@@ -32,64 +32,98 @@ JOINT_FONT_THICKNESS = 3
 
 class Estimator():
     """
-    high level support for doing this and that.
+    Responsible for calculating the pose and displaying the image. 
     """
     def __init__(self, file_name):
-        self.check_weights()
-        file_path = 'content/' + file_name
-        if os.path.isfile(file_path):
-            output, img = self.learn_image(file_path)
-            self.print_pose(output, img)
-        else:
-            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
-
-    def check_weights(self):
-        if os.path.isfile(WEIGHTS_FILE):
-            print("Model available.")
-            return 
-        else:
+        #Downloads the pre-trained model if not already present. 
+        if not os.path.isfile(WEIGHTS_FILE):
             print("Retrieving model from 'posefs1.perception.cs.cmu.edu'. This will take a few minutes. Subsequent runs will skip this step.")
             url = 'http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/mpi/pose_iter_160000.caffemodel'
             r = requests.get(url, allow_redirects=True)
             open(WEIGHTS_FILE, 'wb').write(r.content)
 
-    def learn_image(self, file_path):
+        #Check that the specified image exists.
+        file_path = 'content/' + file_name
+        if os.path.isfile(file_path):
+            #run network on image.
+            img = cv2.imread(file_path)
+            output = self.learn_image(img)
+
+            #get image points to plot.  
+            points = self.get_image_points(output, img)
+
+            #draw points and display eimage
+            self.draw_image(points, img)
+
+        else:
+            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
+
+    def learn_image(self, img):
+        """
+        Runs the DNN on the input image.  
+        """
+        #load the model weights onto the network
         net = cv2.dnn.readNetFromCaffe(PROTO_FILE, WEIGHTS_FILE)
-        img = cv2.imread(file_path)
+
+        #input the image into the network
         inp_blob = cv2.dnn.blobFromImage(img, SCALE_FACTOR, (IN_WIDTH, IN_HEIGHT), RGB_MEAN, swapRB=False, crop=False)
         net.setInput(inp_blob)
-        return net.forward(), img
+        return net.forward()
     
-    def print_pose(self, output, img):
+    def get_image_points(self, output, img):
+        """
+        Extract the joint positions and map to image dimensions. 
+        """
         W = output.shape[2]
         H = output.shape[3]
 
         points = []
-
         for i in range(NPOINTS):
+            #get heat map for each joint 
             prob_map = output[0, i, :, :]
+
+            #extract predicted region for each joint 
             minVal, prob, minLoc, point = cv2.minMaxLoc(prob_map)
 
+            #map region of output to point on image. 
             x = int((img.shape[1] * point[0]) / W)
             y = int((img.shape[0] * point[1]) / H)
 
+            #
             if prob > THRESHOLD:
-                cv2.circle(img, (x,y), JOINT_DOT_WIDTH, JOINT_DOT_COLOR, thickness=-1, lineType=cv2.FILLED)
-                cv2.putText(img, "{}".format(i), (x,y), cv2.FONT_HERSHEY_SIMPLEX, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
                 points.append((x,y))
             else:
                 points.append(None)
-        
+        return points 
+
+    def draw_image(self, points, img):
+        """
+        Draw points and display the image. 
+        """
+
+        #draw points and labels.
+        for i in range(NPOINTS): 
+            if points[i] != None:
+                x = points[i][0]
+                y = points[i][1]
+                cv2.circle(img, (x,y), JOINT_DOT_WIDTH, JOINT_DOT_COLOR, thickness=-1, lineType=cv2.FILLED)
+                cv2.putText(img, "{}".format(i), (x,y), cv2.FONT_HERSHEY_SIMPLEX, JOINT_FONT_SCALE, JOINT_TEXT_COLOR, JOINT_FONT_THICKNESS, lineType=cv2.LINE_AA)
+
+        #draw lines between points. 
         for pair in POSE_PAIRS:
-            partA = pair[0]
-            partB = pair[1]
-            pointA = points[PART_DICT[partA]]
-            pointB = points[PART_DICT[partB]]
+            part_ix_1 = PART_DICT[pair[0]]
+            part_ix_2 = PART_DICT[pair[1]]
+
+            pointA = points[part_ix_1]
+            pointB = points[part_ix_2]
 
             if not pointA is None and not pointB is None:
                 cv2.line(img, pointA, pointB, JOINT_LINE_COLOR, JOINT_LINE_THICKNESS)
         
+        #display the image with the OpenCV image display. 
         cv2.imshow('image', img)
+
+        #press ESC to exit display. 
         k = cv2.waitKey(0)
         if k == 27:
             cv2.destroyAllWindows() 
