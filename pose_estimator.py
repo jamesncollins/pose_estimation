@@ -26,6 +26,25 @@ JOINT_LINE_THICKNESS = 3
 JOINT_FONT_SCALE = 0.75
 JOINT_FONT_THICKNESS = 2
 
+def display_image(img):
+    """
+    Display image. 
+    """       
+    #display the image with the OpenCV image display. 
+    cv2.imshow('image', img)
+
+    #press ESC to exit display. 
+    k = cv2.waitKey(0)
+    if k == 27:
+        cv2.destroyAllWindows() 
+
+class Vectoriser():
+    """
+    Calculates and stores the vector representing the pose.  
+    """
+    def get_vector(self, skeleton):
+        print(skeleton)
+        
 class SkeletonSketch():
 
     def sketch(self, points, file_name):
@@ -33,17 +52,10 @@ class SkeletonSketch():
         Draw points and connect with lines on an image. 
         """
         self.points = points
-        self.file_path = 'content/' + file_name
-
-        #Check that the specified image exists.
-        if os.path.isfile(self.file_path):
-            self.img = cv2.imread(self.file_path)
-            self.__sketch_dots()
-            self.__sketch_lines()
-            return self.img
-
-        else:
-            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
+        self.img = cv2.imread(file_name)
+        self.__sketch_dots()
+        self.__sketch_lines()
+        return self.img
 
     def __sketch_dots(self):
         #draw points and labels.
@@ -76,19 +88,13 @@ class Estimator():
             r = requests.get(url, allow_redirects=True)
             open(WEIGHTS_FILE, 'wb').write(r.content)
     
-    def skeleton(self, file_name):
-        #Check that the specified image exists.
-        file_path = 'content/' + file_name
-        if os.path.isfile(file_path):
-            #run network on image.
-            img = cv2.imread(file_path)
-            output = self.__learn_image(img)
+    def skeleton(self, file_path):
+        #run network on image.
+        img = cv2.imread(file_path)
+        output = self.__learn_image(img)
 
-            #get image points to plot.  
-            return self.__get_image_points(output, img)
-
-        else:
-            print("No file named", file_name, "exists. Make sure it's spelled correctly and in 'content' folder.")
+        #get image points to plot.  
+        return self.__get_image_points(output, img)
 
     def __learn_image(self, img):
         """
