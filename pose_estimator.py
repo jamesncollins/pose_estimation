@@ -43,7 +43,15 @@ class Vectoriser():
     Calculates and stores the vector representing the pose.  
     """
     def get_vector(self, skeleton):
-        print(skeleton)
+
+        v = []
+        for i in skeleton:
+            if i == None:
+                v.append(-1)
+            else:
+                v.append(i[0])
+                v.append(i[1])
+        print(v)
         
 class SkeletonSketch():
 
