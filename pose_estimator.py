@@ -1,5 +1,6 @@
 from cv2 import cv2
 import sys, os, requests 
+import numpy as np
 
 #Skeleton
 ALL_JOINTS = ['Head', 'Neck', 'RShoulder', 'RElbow', 'RWrist',
@@ -41,17 +42,46 @@ def display_image(img):
 class Vectoriser():
     """
     Calculates and stores the vector representing the pose.  
-    """
-    def get_vector(self, skeleton):
-
-        v = []
-        for i in skeleton:
-            if i == None:
-                v.append(-1)
+    # """
+    
+    def get_slants(self, points):
+        """
+        Store angle of each joint.  
+        """
+        angles = []
+    
+        for pp in EDGES:
+            pointTop = points[pp[0]]
+            pointBottom = points[pp[1]]
+        
+            #calculate angle between vertical and joint. 
+            if not None in [pointTop, pointBottom]:
+                pointEdge = (pointBottom[0],0)
+                angle = self.__get_angle(pointEdge, pointBottom, pointTop)
+                if pointTop[0] >= pointEdge[0]:
+                    angles.append(angle)
+                else: 
+                    angles.append(360 - angle)
             else:
-                v.append(i[0])
-                v.append(i[1])
-        print(v)
+                angles.append(-1)
+        
+        return angles
+
+    def __get_angle(self, pL, pC, pR):
+        """
+        Calculate the angle between three (x,y) coordinates.  
+        """
+        a = np.array(pL)
+        b = np.array(pC)
+        c = np.array(pR)
+    
+        ba = a - b
+        bc = c - b
+    
+        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        angle = np.arccos(cosine_angle)
+    
+        return round(np.degrees(angle),2)
         
 class SkeletonSketch():
 
@@ -97,8 +127,10 @@ class Estimator():
             open(WEIGHTS_FILE, 'wb').write(r.content)
     
     def skeleton(self, file_path):
-        #run network on image.
+        #read in image
         img = cv2.imread(file_path)
+
+        #run network on image.
         output = self.__learn_image(img)
 
         #get image points to plot.  
