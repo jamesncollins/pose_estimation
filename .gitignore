@@ -1,6 +1,3 @@
-#not finished
-vectoriser.py
-
 # Model file (too big)
 *.caffemodel
 
