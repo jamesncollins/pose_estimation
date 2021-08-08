@@ -33,7 +33,7 @@ JOINT_FONT_THICKNESS = 2
 def display_image(img):
     """
     Display image. 
-    """       
+    """ 
     #display the image with the OpenCV image display. 
     cv2.imshow('image', img)
 
@@ -49,7 +49,7 @@ class Vectoriser():
     
     def get_slants(self, points):
         """
-        Store angle of each joint.  
+        Return angle of each joint.  
         """
         angles = []
     
@@ -68,7 +68,7 @@ class Vectoriser():
             else:
                 angles.append(-1)
         
-        print(angles)
+        return angles
 
     def __get_angle(self, pL, pC, pR):
         """
