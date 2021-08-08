@@ -1,4 +1,4 @@
-sketch_pose
+pose_estimator
 ==============
 
 A python library for tools estimating a person's from pose from a picture. 
@@ -14,7 +14,7 @@ git clone https://github.com/jamesncollins/pose_estimation.git
 2. Place the image you want to analyse in the '/content' directory. 
 
 
-### sketch_pose
+## sketch_pose
 
 To print the image with the pose graphically represented: 
 
@@ -26,7 +26,7 @@ python sketch_pose.py <IMAGE-FILE-NAME>
 
 4. Press ESC to exit image.
 
-## Example
+### Example
 
 ```
 katharine.png
@@ -41,7 +41,7 @@ python sketch_pose.py katharine.png
  ![Pose](https://github.com/jamesncollins/pose_estimation/blob/main/content/katharine2.png?raw=true)
 
 
-### vectoriser
+## vectoriser
 
 To generate a vector representing the pose:
 
