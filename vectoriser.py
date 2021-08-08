@@ -1,5 +1,7 @@
 from cv2 import cv2
-import sys, os, requests 
+import sys
+import os 
+import requests 
 import pose_estimator
 
 if __name__ == "__main__":

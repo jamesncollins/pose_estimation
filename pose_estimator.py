@@ -1,6 +1,8 @@
 from cv2 import cv2
-import sys, os, requests 
 import numpy as np
+import sys 
+import os 
+import requests 
 
 #Skeleton
 ALL_JOINTS = ['Head', 'Neck', 'RShoulder', 'RElbow', 'RWrist',
@@ -11,6 +13,7 @@ EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [1, 5], [5, 6], [6, 7], [1, 14],
 
 PROTO_FILE = "content/pose_deploy_linevec_faster_4_stages.prototxt.txt"
 WEIGHTS_FILE = "content/pose_iter_160000.caffemodel"
+URL = 'http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/mpi/pose_iter_160000.caffemodel'
 
 THRESHOLD = 0.3
 
@@ -65,7 +68,7 @@ class Vectoriser():
             else:
                 angles.append(-1)
         
-        return angles
+        print(angles)
 
     def __get_angle(self, pL, pC, pR):
         """
@@ -82,7 +85,7 @@ class Vectoriser():
         angle = np.arccos(cosine_angle)
     
         return round(np.degrees(angle),2)
-        
+
 class SkeletonSketch():
 
     def sketch(self, points, file_name):
@@ -122,15 +125,12 @@ class Estimator():
         #Downloads the pre-trained model if not already present. 
         if not os.path.isfile(WEIGHTS_FILE):
             print("Retrieving model from 'posefs1.perception.cs.cmu.edu'. This will take a few minutes. Subsequent runs will skip this step.")
-            url = 'http://posefs1.perception.cs.cmu.edu/OpenPose/models/pose/mpi/pose_iter_160000.caffemodel'
-            r = requests.get(url, allow_redirects=True)
+            r = requests.get(URL, allow_redirects=True)
             open(WEIGHTS_FILE, 'wb').write(r.content)
     
     def skeleton(self, file_path):
-        #read in image
-        img = cv2.imread(file_path)
-
         #run network on image.
+        img = cv2.imread(file_path)
         output = self.__learn_image(img)
 
         #get image points to plot.  
